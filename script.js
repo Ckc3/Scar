@@ -7,8 +7,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const profileImage = document.getElementById('profileImage');
 
     const bioTexts = [
-        "Slit me.",
-        "Death.",
+        "Scarlett.",
+        "Lord has lift me up.",
         "Main account: ckc8.",
         "Dis banned.",
         "you don't act like this when i die"
