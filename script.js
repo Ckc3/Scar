@@ -1,215 +1,227 @@
 
-document.addEventListener('DOMContentLoaded', function() {
-    const typewriterElement = document.getElementById('typewriter');
-    const audioElement = document.getElementById('backgroundAudio');
-    const navbar = document.querySelector('.navbar');
-    const themeToggle = document.querySelector('.theme-toggle');
-    const profileImage = document.getElementById('profileImage');
+const API_URL = 'https://api.lanyard.rest/v1/users/1383899725866205316';
 
-    const bioTexts = [
-        "Scarlett.",
-        "Lord has lift me up.",
-        "Main account: ckc8.",
-        "Dis banned.",
-        "you don't act like this when i die"
-    ];
+const badgeMap = {
+    1: 'Staff',
+    2: 'Partner', 
+    4: 'Hypesquad',
+    8: 'Bug Hunter',
+    64: 'Bravery',
+    128: 'Brilliance',
+    256: 'Balance', 
+    512: 'Early Supporter',
+    16384: 'Bug Hunter Gold',
+    131072: 'Verified Developer',
+    262144: 'Early Verified Developer',
+    4194304: 'Certified Moderator',
+    4398046511104: 'Active Developer'
+};
+
+let isLoading = false;
+
+async function fetchDiscordData() {
+    if (isLoading) return;
+    isLoading = true;
     
-    let currentTextIndex = 0;
-    let isTyping = false;
-    let currentIndex = 0;
-    let audioStarted = false;
-
-
-    function typeWriter() {
-        if (isTyping) return;
+    try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
         
-        isTyping = true;
-        typewriterElement.textContent = '';
-        currentIndex = 0;
-        
-        const currentText = bioTexts[currentTextIndex];
-        
-        function type() {
-            if (currentIndex < currentText.length) {
-                typewriterElement.textContent += currentText.charAt(currentIndex);
-                currentIndex++;
-                setTimeout(type, 80);
-            } else {
-                isTyping = false;
-                setTimeout(() => {
-                    currentTextIndex = (currentTextIndex + 1) % bioTexts.length;
-                    setTimeout(typeWriter, 500);
-                }, 3000);
-            }
+        if (data.success && data.data) {
+            updateProfile(data.data);
+        } else {
+            showError('Failed to load profile data');
         }
-        
-        type();
+    } catch (error) {
+        console.error('Error fetching Discord data:', error);
+        showError('Connection error');
+    } finally {
+        isLoading = false;
     }
+}
 
-
-    setTimeout(typeWriter, 1500);
-
-
-    let lastScrollY = window.scrollY;
+function updateProfile(userData) {
+    const { discord_user, discord_status, activities, listening_to_spotify, spotify } = userData;
     
-    window.addEventListener('scroll', () => {
-        const currentScrollY = window.scrollY;
+
+    if (discord_user.avatar) {
+        const avatarUrl = `https://cdn.discordapp.com/avatars/${discord_user.id}/${discord_user.avatar}.png?size=256`;
+        document.getElementById('avatar').src = avatarUrl;
+    }
+    
+
+    const usernameText = discord_user.discriminator === '0' 
+        ? `@${discord_user.username}` 
+        : `${discord_user.username}#${discord_user.discriminator}`;
+    document.getElementById('username').textContent = usernameText;
+    
+
+    updateStatus(discord_status);
+    
+
+    updateCustomStatus(activities);
+    
+
+    updateBadges(discord_user.public_flags, discord_user.primary_guild);
+    
+
+    updateSpotify(listening_to_spotify, spotify);
+}
+
+function updateStatus(status) {
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+    
+
+    statusDot.className = 'status-indicator';
+    statusDot.classList.add(status || 'offline');
+    
+    const statusMessages = {
+        'online': 'Online',
+        'idle': 'Away',
+        'dnd': 'Do Not Disturb',
+        'offline': 'Offline'
+    };
+    
+    statusText.textContent = statusMessages[status] || 'Unknown';
+}
+
+function updateCustomStatus(activities) {
+    const customStatusElement = document.getElementById('custom-status');
+    const customStatusCard = document.getElementById('custom-status-card');
+    
+    if (activities && activities.length > 0) {
+        const customActivity = activities.find(activity => activity.type === 4);
         
-        if (currentScrollY > 100) {
-            navbar.style.background = 'rgba(10, 10, 10, 0.95)';
-            navbar.style.borderBottom = '1px solid rgba(255, 255, 255, 0.2)';
-        } else {
-            navbar.style.background = 'rgba(10, 10, 10, 0.8)';
-            navbar.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
+        if (customActivity && customActivity.state) {
+            customStatusElement.textContent = customActivity.state;
+            customStatusCard.style.display = 'block';
+            return;
         }
-        
-        if (currentScrollY > lastScrollY && currentScrollY > 100) {
-            navbar.style.transform = 'translateY(-100%)';
-        } else {
-            navbar.style.transform = 'translateY(0)';
-        }
-        
-        lastScrollY = currentScrollY;
-    });
+    }
+    
+    customStatusElement.textContent = 'No custom status';
+    customStatusCard.style.display = 'block';
+}
 
+function updateBadges(publicFlags, primaryGuild) {
+    const badgesContainer = document.getElementById('badges-container');
+    badgesContainer.innerHTML = '';
+    
+    let badgeCount = 0;
+    
 
-    themeToggle.addEventListener('click', function() {
-        const icon = themeToggle.querySelector('i');
-        
-        if (icon.classList.contains('fa-moon')) {
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
+    if (primaryGuild && primaryGuild.tag) {
+        const guildBadge = createBadge(primaryGuild.tag, 'guild');
+        badgesContainer.appendChild(guildBadge);
+        badgeCount++;
+    }
+    
 
-        } else {
-            icon.classList.remove('fa-sun');
-            icon.classList.add('fa-moon');
-
-        }
-    });
-
-
-    const buttons = document.querySelectorAll('.btn');
-    buttons.forEach(button => {
-        button.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-3px)';
-        });
-        
-        button.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-        });
-        
-        button.addEventListener('click', function(e) {
-
-            const ripple = document.createElement('span');
-            const rect = this.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            const x = e.clientX - rect.left - size / 2;
-            const y = e.clientY - rect.top - size / 2;
-            
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = x + 'px';
-            ripple.style.top = y + 'px';
-            ripple.classList.add('ripple');
-            
-            this.appendChild(ripple);
-            
-            setTimeout(() => {
-                ripple.remove();
-            }, 600);
-        });
-    });
-
-
-    profileImage.addEventListener('click', function() {
-        this.style.transform = 'scale(1.1) rotate(5deg)';
-        setTimeout(() => {
-            this.style.transform = 'scale(1) rotate(0deg)';
-        }, 300);
-    });
-
-
-    document.addEventListener('click', function() {
-        if (!audioStarted) {
-            audioElement.play().catch(e => {
-                console.log('Audio play failed:', e);
-            });
-            audioStarted = true;
-        }
-    });
-
-    audioElement.addEventListener('pause', function() {
-        if (audioStarted) {
-            audioElement.play().catch(e => {
-                console.log('Audio restart failed:', e);
-            });
-        }
-    });
-
-
-    setTimeout(() => {
-        audioElement.play().then(() => {
-            audioStarted = true;
-        }).catch(e => {
-            console.log('Auto-play prevented - click anywhere to start audio');
-        });
-    }, 2000);
-
-
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href');
-            if (targetId.startsWith('#')) {
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
+    if (publicFlags && publicFlags > 0) {
+        Object.entries(badgeMap).forEach(([flagValue, badgeName]) => {
+            if (publicFlags & parseInt(flagValue)) {
+                const badge = createBadge(badgeName);
+                badgesContainer.appendChild(badge);
+                badgeCount++;
             }
         });
-    });
+    }
+    
 
+    if (badgeCount === 0) {
+        const defaultBadge = createBadge('Discord User');
+        badgesContainer.appendChild(defaultBadge);
+    }
+}
 
-    window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        const shapes = document.querySelectorAll('.floating-shape');
+function createBadge(text, type = '') {
+    const badge = document.createElement('div');
+    badge.className = `badge ${type}`;
+    badge.textContent = text;
+    return badge;
+}
+
+function updateSpotify(isListening, spotifyData) {
+    const spotifyCard = document.getElementById('spotify-card');
+    
+    if (isListening && spotifyData) {
+        spotifyCard.classList.remove('hidden');
         
-        shapes.forEach((shape, index) => {
-            const speed = 0.5 + (index * 0.1);
-            shape.style.transform = `translateY(${scrolled * speed}px)`;
-        });
+
+        const albumArt = document.getElementById('album-art');
+        if (spotifyData.album_art_url) {
+            albumArt.src = spotifyData.album_art_url;
+            albumArt.alt = `${spotifyData.album} by ${spotifyData.artist}`;
+        }
+        
+
+        document.getElementById('track-name').textContent = spotifyData.song || 'Unknown Track';
+        document.getElementById('artist-name').textContent = spotifyData.artist || 'Unknown Artist';
+        
+    } else {
+        spotifyCard.classList.add('hidden');
+    }
+}
+
+function showError(message) {
+    console.error('Profile Error:', message);
+    document.getElementById('status-text').textContent = message;
+}
+
+
+function setLoadingState(isLoading) {
+    const elements = ['username', 'status-text', 'custom-status'];
+    elements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            if (isLoading) {
+                element.classList.add('loading');
+                element.textContent = 'Loading...';
+            } else {
+                element.classList.remove('loading');
+            }
+        }
     });
+}
 
 
-    setTimeout(() => {
-        document.body.classList.add('loaded');
-    }, 100);
+let audio = null;
+let hasPlayedAudio = false;
+
+function initAudio() {
+    if (!audio) {
+        audio = new Audio('song.mp3');
+        audio.loop = true;
+        audio.volume = 0.5;
+    }
+}
+
+function playAudio() {
+    if (!hasPlayedAudio) {
+        initAudio();
+        audio.play().catch(error => {
+            console.log('Audio play failed:', error);
+        });
+        hasPlayedAudio = true;
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    setLoadingState(true);
+    fetchDiscordData();
+    
+
+    setInterval(fetchDiscordData, 30000);
+    
+
+    document.addEventListener('click', playAudio, { once: true });
 });
 
 
-const style = document.createElement('style');
-style.textContent = `
-    .btn {
-        position: relative;
-        overflow: hidden;
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+        fetchDiscordData();
     }
-    
-    .ripple {
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
-        transform: scale(0);
-        animation: ripple-animation 0.6s ease-out;
-        pointer-events: none;
-    }
-    
-    @keyframes ripple-animation {
-        to {
-            transform: scale(2);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(style);
+});

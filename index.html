@@ -4,88 +4,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scarlett - Portfolio</title>
-    <link href="style.css" rel="stylesheet" type="text/css" />
+    <title>Scarlett's Profile</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="style.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-    <div class="noise-overlay"></div>
-    
-    <nav class="navbar">
-        <div class="nav-brand">
-            <span class="brand-text">SCARLETT</span>
-        </div>
-        <div class="nav-menu">
-            <a href="#about" class="nav-link">About</a>
-        </div>
-        <div class="theme-toggle">
-            <i class="fas fa-moon"></i>
-        </div>
-    </nav>
-
-    <div class="current-account">
-        <div class="account-info">
-            <div class="status-indicator"></div>
-            <span class="username">ckc8</span>
-        </div>
+    <div class="background">
+        <video autoplay muted loop class="bg-video">
+            <source src="bg.mp4" type="video/mp4">
+        </video>
     </div>
     
-    <main class="hero-section">
-        <div class="hero-content">
-            <div class="profile-container">
-                <div class="profile-pic">
-                    <img src="pfp.png" alt="Scarlett" id="profileImage">
-                    <div class="profile-ring"></div>
-                </div>
-                <div class="status-badge">Available</div>
-            </div>
-            
-            <div class="intro-text">
-                <h1 class="hero-title">
-                    <span class="greeting">Hello, I'm</span>
-                    <span class="name-highlight">Scarlett</span>
-                </h1>
-                
-                <div class="bio-container">
-                    <p class="bio-subtitle">Slit no more</p>
-                    <div class="typewriter-container">
-                        <span id="typewriter"></span>
-                        <span class="cursor">|</span>
+    <div class="container">
+        <div class="profile-card">
+            <div class="profile-layout">
+
+                <div class="profile-header">
+                    <div class="avatar-wrapper">
+                        <div class="avatar-container">
+                            <img id="avatar" src="" alt="Avatar" class="avatar">
+                            <div class="status-indicator" id="status-dot"></div>
+                        </div>
+                        <div class="pulse-ring"></div>
+                    </div>
+                    
+                    <div class="user-details">
+                        <h1 class="display-name">Scarlett</h1>
+                        <p class="username" id="username">@loading...</p>
+                        <div class="status-text" id="status-text">Loading...</div>
                     </div>
                 </div>
                 
-                <div class="cta-buttons">
-                    <button class="btn btn-primary">
-                        <span>Get In Touch</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
-                    <button class="btn btn-secondary">
-                        <span>View Work</span>
-                        <i class="fas fa-external-link-alt"></i>
-                    </button>
+
+                <div class="info-section">
+
+                    <div class="info-card" id="custom-status-card">
+                        <div class="card-header">
+                            <div class="card-icon">◉</div>
+                            <span class="card-title">Custom Status</span>
+                        </div>
+                        <div class="card-content" id="custom-status">No custom status</div>
+                    </div>
+                    
+
+                    <div class="info-card">
+                        <div class="card-header">
+                            <div class="card-icon">★</div>
+                            <span class="card-title">Badges</span>
+                        </div>
+                        <div class="badges-grid" id="badges-container">
+                            <div class="badge-placeholder">Loading...</div>
+                        </div>
+                    </div>
+                    
+
+                    <div class="info-card spotify-card" id="spotify-card">
+                        <div class="card-header">
+                            <div class="card-icon">♪</div>
+                            <span class="card-title">Listening to Spotify</span>
+                        </div>
+                        <div class="spotify-content" id="spotify-content">
+                            <div class="album-art-container">
+                                <img id="album-art" src="" alt="Album Art" class="album-art">
+                                <div class="music-visualizer">
+                                    <div class="bar"></div>
+                                    <div class="bar"></div>
+                                    <div class="bar"></div>
+                                    <div class="bar"></div>
+                                </div>
+                            </div>
+                            <div class="track-info">
+                                <div class="track-name" id="track-name">Track Name</div>
+                                <div class="artist-name" id="artist-name">Artist Name</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <div class="scroll-indicator">
-            <div class="scroll-arrow">
-                <i class="fas fa-chevron-down"></i>
-            </div>
-            <span class="scroll-text">Scroll to explore</span>
-        </div>
-    </main>
-
-    <div class="floating-elements">
-        <div class="floating-shape shape-1"></div>
-        <div class="floating-shape shape-2"></div>
-        <div class="floating-shape shape-3"></div>
     </div>
-
-    <audio id="backgroundAudio" loop>
-        <source src="assets/sound.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
     
     <script src="script.js"></script>
 </body>
